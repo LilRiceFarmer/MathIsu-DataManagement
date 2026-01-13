@@ -1,10 +1,8 @@
 from spreadsheet import Spreadsheet
-from stats import column_stats
-from graphs import scatter_with_correlation
+from stats import column_stats, column_box_stats
+from graphs import scatter_with_correlation, box_plot_column
 
 def sheet_menu(sheet):
-     # Menu for working with a single spreadsheet
-    # Lets the user view, edit, add, or delete columns/rows, do stats, or make plots
     while True:
         print(f"\n--- Spreadsheet: {sheet.name} ---")
         print("0. Show column indexes")
@@ -14,15 +12,15 @@ def sheet_menu(sheet):
         print("4. Delete column")
         print("5. Delete row")
         print("6. View spreadsheet")
-        print("7. Column statistics")
+        print("7. Column statistics (mean/median/mode)")
         print("8. Scatter plot")
-        print("9. Save & return")
+        print("9. Box plot + quartile stats")
+        print("10. Save & return")
 
         choice = input("Choose: ")
 
         try:
             if choice == "0":
-                print("\nColumn indexes:")
                 for i, h in enumerate(sheet.headers):
                     print(f"{i}: {h}")
 
@@ -30,34 +28,27 @@ def sheet_menu(sheet):
                 title = input("Column title: ")
                 values = [float(x) for x in input("Values: ").split(",")]
                 sheet.add_column(title, values)
-                print("Column added.")
 
             elif choice == "2":
                 col = int(input("Column index: "))
-                values = [float(x) for x in input("Values to Add: ").split(",")]
+                values = [float(x) for x in input("Values to add: ").split(",")]
                 sheet.append_to_column(col, values)
-                print("Values Added.")
 
             elif choice == "3":
                 row = int(input("Row index (starting at 0): "))
                 col = int(input("Column index: "))
                 value = float(input("New value: "))
                 sheet.edit_cell(row, col, value)
-                print("Cell updated.")
 
             elif choice == "4":
                 col = int(input("Column index to delete: "))
-                confirm = input("Type DELETE to confirm: ")
-                if confirm == "DELETE":
+                if input("Type DELETE to confirm: ") == "DELETE":
                     sheet.delete_column(col)
-                    print("Column deleted.")
 
             elif choice == "5":
                 row = int(input("Row index to delete: "))
-                confirm = input("Type DELETE to confirm: ")
-                if confirm == "DELETE":
+                if input("Type DELETE to confirm: ") == "DELETE":
                     sheet.delete_row(row)
-                    print("Row deleted.")
 
             elif choice == "6":
                 sheet.display()
@@ -72,6 +63,13 @@ def sheet_menu(sheet):
                 scatter_with_correlation(sheet, x, y)
 
             elif choice == "9":
+                col = int(input("Column index: "))
+                stats = column_box_stats(sheet, col)
+                for k, v in stats.items():
+                    print(f"{k}: {v}")
+                box_plot_column(sheet, col)
+
+            elif choice == "10":
                 sheet.save()
                 print("Saved.")
                 return
@@ -82,6 +80,7 @@ def sheet_menu(sheet):
         except Exception as e:
             print("Error:", e)
             input("Press Enter to continue...")
+
 
 def main():
     while True:
@@ -104,10 +103,9 @@ def main():
 
             elif choice == "3":
                 name = input("Name: ")
-                confirm = input("Type DELETE to confirm: ")
-                if confirm == "DELETE":
+                if input("Type DELETE to confirm: ") == "DELETE":
                     Spreadsheet.delete(name)
-                    print("Spreadsheet deleted.")
+                    print("Deleted.")
 
             elif choice == "4":
                 break
